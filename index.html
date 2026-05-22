@@ -132,6 +132,14 @@ textarea{resize:vertical;min-height:80px}
 .item-card-top{display:flex;align-items:flex-start;gap:8px}
 .item-card-top-content{flex:1;min-width:0}
 
+.bg-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px}
+.bg-swatch{width:100%;aspect-ratio:1.6;border-radius:var(--radius-sm);cursor:pointer;border:2px solid transparent;transition:.15s;overflow:hidden}
+.bg-swatch:hover{transform:scale(1.05)}
+.bg-swatch.active{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent2)}
+.bg-custom-row{display:flex;align-items:center;gap:8px;margin-top:6px}
+.bg-custom-row label{font-size:12px;color:var(--text2);white-space:nowrap;text-transform:none;letter-spacing:0;margin:0}
+.bg-color-pick{width:38px;height:32px;border-radius:6px;border:1.5px solid var(--border);cursor:pointer;padding:2px;background:var(--bg3)}
+
 /* ── IA CHAT ── */
 .ai-panel{position:fixed;top:0;left:-480px;width:460px;height:100vh;background:var(--bg2);border-right:1.5px solid var(--border);z-index:150;display:flex;flex-direction:column;transition:.3s;box-shadow:10px 0 40px var(--shadow)}
 .ai-panel.open{left:0}
@@ -277,7 +285,30 @@ body.theme-nuit input,body.theme-nuit select,body.theme-nuit textarea{color-sche
 <div class="settings-panel" id="settingsPanel">
   <div class="settings-title">⚙️ Paramètres</div>
   <div class="settings-section">
-    <div class="settings-section-title">Thème de fond</div>
+    <div class="settings-section-title">Fond d'écran du calendrier</div>
+    <div class="bg-grid" id="bgGrid">
+      <div class="bg-swatch active" id="bg-none" onclick="setBg('none')" style="background:var(--bg);border-style:dashed;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:var(--text3)">Aucun</div>
+      <div class="bg-swatch" id="bg-dots" onclick="setBg('dots')" style="background:#fff;background-image:radial-gradient(circle,#c8c0b4 1px,transparent 1px);background-size:18px 18px"></div>
+      <div class="bg-swatch" id="bg-lines" onclick="setBg('lines')" style="background:#fff;background-image:repeating-linear-gradient(transparent,transparent 19px,#e0d8cc 19px,#e0d8cc 20px)"></div>
+      <div class="bg-swatch" id="bg-grid" onclick="setBg('grid')" style="background:#fff;background-image:linear-gradient(#e0d8cc 1px,transparent 1px),linear-gradient(90deg,#e0d8cc 1px,transparent 1px);background-size:20px 20px"></div>
+      <div class="bg-swatch" id="bg-cross" onclick="setBg('cross')" style="background:#fdf8f0;background-image:repeating-linear-gradient(45deg,#e8ddd020 0,#e8ddd020 1px,transparent 0,transparent 50%);background-size:12px 12px"></div>
+      <div class="bg-swatch" id="bg-wave" onclick="setBg('wave')" style="background:linear-gradient(135deg,#e8f4fb 25%,#d6ecfa 50%,#e8f4fb 75%)"></div>
+      <div class="bg-swatch" id="bg-sunset" onclick="setBg('sunset')" style="background:linear-gradient(160deg,#fef0e8,#fddbc8,#f2c4a8)"></div>
+      <div class="bg-swatch" id="bg-forest" onclick="setBg('forest')" style="background:linear-gradient(160deg,#ebf5ec,#d3edcc,#bbe0bf)"></div>
+      <div class="bg-swatch" id="bg-night" onclick="setBg('night')" style="background:linear-gradient(160deg,#161b2b,#1f2742,#252e4a)"></div>
+      <div class="bg-swatch" id="bg-galaxy" onclick="setBg('galaxy')" style="background:linear-gradient(135deg,#0d0221,#1a0533,#0d1b4b);background-image:radial-gradient(circle at 20% 30%,#ffffff18 1px,transparent 1px),radial-gradient(circle at 80% 70%,#ffffff12 1px,transparent 1px),radial-gradient(circle at 50% 50%,#ffffff10 1px,transparent 1px);background-size:100% 100%,80px 80px,50px 50px"></div>
+      <div class="bg-swatch" id="bg-paper" onclick="setBg('paper')" style="background:#f9f6ed;background-image:repeating-linear-gradient(transparent,transparent 27px,#ddd5c060 27px,#ddd5c060 28px)"></div>
+      <div class="bg-swatch" id="bg-cherry" onclick="setBg('cherry')" style="background:linear-gradient(135deg,#fff0f5,#ffd6e7,#ffb3cc)"></div>
+    </div>
+    <div class="bg-custom-row">
+      <label>Couleur personnalisée :</label>
+      <input type="color" class="bg-color-pick" id="bgColorPick" value="#FDF8F0" oninput="setBgColor(this.value)">
+      <span style="font-size:12px;color:var(--text3)" id="bgColorVal">#FDF8F0</span>
+    </div>
+  </div>
+
+  <div class="settings-section">
+    <div class="settings-section-title">Thème de couleurs</div>
     <div class="theme-grid">
       <div class="theme-swatch active" onclick="setTheme('')" id="sw-default"><div class="swatch-preview" style="background:linear-gradient(135deg,#FDF8F0,#F5EFE3)"></div><div class="swatch-label">Crème</div></div>
       <div class="theme-swatch" onclick="setTheme('ocean')" id="sw-ocean"><div class="swatch-preview" style="background:linear-gradient(135deg,#EBF4FB,#C0DFF0)"></div><div class="swatch-label">Océan</div></div>
@@ -366,7 +397,7 @@ function makeDay(y,m,d,other){
   const chipsEl=document.createElement('div');chipsEl.className='day-items';
   items.slice(0,3).forEach(item=>{
     const chip=document.createElement('div');chip.className='day-chip';
-    if(item.type==='devoir'){const mat=MATIÈRES.find(x=>x.id===item.matiere)||MATIÈRES[MATIÈRES.length-1];chip.style.background=mat.bg;chip.style.color=mat.color;chip.textContent=item.title||mat.label;}
+    if(item.type==='devoir'){const mat=MATIÈRES.find(x=>x.id===item.matiere)||MATIÈRES[MATIÈRES.length-1];chip.style.background=item.done?'#DCFCE7':mat.bg;chip.style.color=item.done?'#166534':mat.color;if(item.done)chip.style.textDecoration='line-through';chip.textContent=item.title||mat.label;}
     else{const et=EVENT_TYPES.find(x=>x.id===item.eventType)||EVENT_TYPES[EVENT_TYPES.length-1];chip.style.background=et.bg;chip.style.color=et.color;chip.textContent=item.title;}
     chipsEl.appendChild(chip);
   });
@@ -392,7 +423,7 @@ function renderSidebar(key,y,m,d){
   if(devoirs.length){
     const nb=devoirs.length;const nbFaits=devoirs.filter(i=>i.done).length;
     html+=`<div class="section-label" style="margin-bottom:8px">📚 Devoirs (${nbFaits}/${nb} faits)</div><div class="items-list">`;
-    devoirs.forEach(item=>{const mat=MATIÈRES.find(x=>x.id===item.matiere)||MATIÈRES[MATIÈRES.length-1];const pColors={low:'#22C55E',medium:'#F59E0B',high:'#EF4444'};const pLabels={low:'Faible',medium:'Moyen',high:'Urgent'};html+=`<div class="item-card${item.done?' is-done':''}" style="border-left-color:${item.done?'#22C55E':mat.color}"><div class="item-card-top"><button class="item-done-btn${item.done?' done':''}" onclick="toggleDone('${item.id}')" title="${item.done?'Marquer non fait':'Marquer comme fait'}">${item.done?'✓':''}</button><div class="item-card-top-content"><span class="item-card-badge" style="background:${mat.bg};color:${mat.color}">${mat.label}</span>${item.priority&&!item.done?`<span class="item-card-badge" style="background:none;color:${pColors[item.priority]||'#94A3B8'};margin-left:4px">● ${pLabels[item.priority]||''}</span>`:''}<div class="item-card-title">${escHtml(item.title||'Sans titre')}</div>${item.desc?`<div class="item-card-sub">${escHtml(item.desc)}</div>`:''}</div><button class="item-del" onclick="deleteItem('${item.id}')">✕</button></div></div>`;});
+    devoirs.forEach(item=>{const mat=MATIÈRES.find(x=>x.id===item.matiere)||MATIÈRES[MATIÈRES.length-1];const pColors={low:'#22C55E',medium:'#F59E0B',high:'#EF4444'};const pLabels={low:'Faible',medium:'Moyen',high:'Urgent'};html+=`<div class="item-card${item.done?' is-done':''}" style="border-left-color:${item.done?'#22C55E':mat.color}"><div class="item-card-top"><button class="item-done-btn${item.done?' done':''}" onclick="toggleDone('${item.id}',event)" title="${item.done?'Marquer non fait':'Marquer comme fait'}">${item.done?'✓':''}</button><div class="item-card-top-content"><span class="item-card-badge" style="background:${mat.bg};color:${mat.color}">${mat.label}</span>${item.priority&&!item.done?`<span class="item-card-badge" style="background:none;color:${pColors[item.priority]||'#94A3B8'};margin-left:4px">● ${pLabels[item.priority]||''}</span>`:''}<div class="item-card-title">${escHtml(item.title||'Sans titre')}</div>${item.desc?`<div class="item-card-sub">${escHtml(item.desc)}</div>`:''}</div><button class="item-del" onclick="deleteItem('${item.id}')">✕</button></div></div>`;});
     html+='</div>';
   }
   if(events.length){
@@ -406,6 +437,8 @@ function renderSidebar(key,y,m,d){
 }
 
 function deleteItem(id){state.items=state.items.filter(i=>i.id!==id);save();if(state.selectedDate){const p=state.selectedDate.split('-');renderSidebar(state.selectedDate,+p[0],+p[1],+p[2]);}renderCalendar();}
+
+function toggleDone(id,event){if(event)event.stopPropagation();const idx=state.items.findIndex(i=>i.id===id);if(idx===-1)return;state.items[idx]=Object.assign({},state.items[idx],{done:!state.items[idx].done});save();if(state.selectedDate){const p=state.selectedDate.split('-');renderSidebar(state.selectedDate,+p[0],+p[1],+p[2]);}renderCalendar();}
 
 // ─── MODAL ───────────────────────────────────────────────────────────────────
 function openAddModal(type){
@@ -463,6 +496,53 @@ function goToday(){const t=new Date();currentYear=t.getFullYear();currentMonth=t
 function setTheme(t){document.body.className=t?'theme-'+t:'';state.theme=t;save();document.querySelectorAll('.theme-swatch').forEach(s=>s.classList.remove('active'));document.getElementById('sw-'+(t||'default')).classList.add('active');}
 function applyTheme(){if(state.theme)setTheme(state.theme);else document.getElementById('sw-default').classList.add('active');}
 function toggleSettings(){document.getElementById('settingsPanel').classList.toggle('open')}
+
+// ─── FOND CALENDRIER ──────────────────────────────────────────────────────────
+const BG_STYLES={
+  none:'',
+  dots:'radial-gradient(circle,#c8c0b4 1px,transparent 1px) center/18px 18px',
+  lines:'repeating-linear-gradient(transparent,transparent 19px,#e0d8cc 19px,#e0d8cc 20px)',
+  grid:'linear-gradient(#e0d8cc 1px,transparent 1px) 0 0/20px 20px,linear-gradient(90deg,#e0d8cc 1px,transparent 1px) 0 0/20px 20px',
+  cross:'repeating-linear-gradient(45deg,#e8ddd020 0,#e8ddd020 1px,transparent 0,transparent 50%) 0 0/12px 12px',
+  wave:'linear-gradient(135deg,#e8f4fb 25%,#d6ecfa 50%,#e8f4fb 75%)',
+  sunset:'linear-gradient(160deg,#fef0e8,#fddbc8,#f2c4a8)',
+  forest:'linear-gradient(160deg,#ebf5ec,#d3edcc,#bbe0bf)',
+  night:'linear-gradient(160deg,#161b2b,#1f2742,#252e4a)',
+  galaxy:'linear-gradient(135deg,#0d0221,#1a0533,#0d1b4b)',
+  paper:'repeating-linear-gradient(transparent,transparent 27px,#ddd5c060 27px,#ddd5c060 28px)',
+  cherry:'linear-gradient(135deg,#fff0f5,#ffd6e7,#ffb3cc)',
+};
+function setBg(key){
+  state.bg=key;state.bgColor=null;save();applyBg();
+  document.querySelectorAll('.bg-swatch').forEach(s=>s.classList.remove('active'));
+  const el=document.getElementById('bg-'+key);if(el)el.classList.add('active');
+}
+function setBgColor(hex){
+  state.bgColor=hex;state.bg='custom';save();applyBg();
+  document.querySelectorAll('.bg-swatch').forEach(s=>s.classList.remove('active'));
+  document.getElementById('bgColorVal').textContent=hex;
+}
+function applyBg(){
+  const cal=document.getElementById('calendarMain');
+  if(!cal)return;
+  if(state.bgColor&&state.bg==='custom'){
+    cal.style.background=state.bgColor;cal.style.backgroundImage='';
+    document.getElementById('bgColorPick').value=state.bgColor;
+    document.getElementById('bgColorVal').textContent=state.bgColor;
+    return;
+  }
+  const key=state.bg||'none';
+  const style=BG_STYLES[key]||'';
+  if(!style){cal.style.background='';cal.style.backgroundImage='';return;}
+  if(style.includes('gradient(#')||style.includes('radial')){
+    // multi-layer: first is bg shorthand
+    cal.style.background=style;cal.style.backgroundImage='';
+  } else {
+    cal.style.backgroundImage=style;cal.style.backgroundColor='';
+  }
+  const el=document.getElementById('bg-'+key);
+  if(el){document.querySelectorAll('.bg-swatch').forEach(s=>s.classList.remove('active'));el.classList.add('active');}
+}
 
 // ─── LEGEND ──────────────────────────────────────────────────────────────────
 function renderLegend(){const used=new Set(state.items.filter(i=>i.type==='devoir').map(i=>i.matiere));const el=document.getElementById('matiereLegend');if(!used.size){el.innerHTML=`<div style="font-size:12px;color:var(--text3)">Aucun devoir enregistré</div>`;return;}el.innerHTML=MATIÈRES.filter(m=>used.has(m.id)).map(m=>`<div class="matiere-item"><div class="matiere-dot" style="background:${m.color}"></div>${m.label}</div>`).join('');}
@@ -561,7 +641,7 @@ function addAiMsg(txt,type){
 }
 
 // ─── INIT ────────────────────────────────────────────────────────────────────
-load();applyTheme();renderCalendar();
+load();applyTheme();applyBg();renderCalendar();
 if(state.selectedDate){const p=state.selectedDate.split('-');const y=+p[0],m=+p[1],d=+p[2];if(y===currentYear&&m===currentMonth)renderSidebar(state.selectedDate,y,m,d);}
 </script>
 </body>
