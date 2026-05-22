@@ -124,6 +124,14 @@ textarea{resize:vertical;min-height:80px}
 .calc-btn.clr:hover{background:#EF4444;color:#fff}
 .calc-btn.span2{grid-column:span 2}
 
+.item-done-btn{background:none;border:2px solid var(--border);border-radius:50%;width:22px;height:22px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;transition:.15s;color:var(--text3)}
+.item-done-btn:hover{border-color:#22C55E;color:#22C55E}
+.item-done-btn.done{border-color:#22C55E;background:#22C55E;color:#fff}
+.item-card.is-done{opacity:.6}
+.item-card.is-done .item-card-title{text-decoration:line-through;color:var(--text3)}
+.item-card-top{display:flex;align-items:flex-start;gap:8px}
+.item-card-top-content{flex:1;min-width:0}
+
 /* ── IA CHAT ── */
 .ai-panel{position:fixed;top:0;left:-480px;width:460px;height:100vh;background:var(--bg2);border-right:1.5px solid var(--border);z-index:150;display:flex;flex-direction:column;transition:.3s;box-shadow:10px 0 40px var(--shadow)}
 .ai-panel.open{left:0}
@@ -247,11 +255,11 @@ body.theme-nuit input,body.theme-nuit select,body.theme-nuit textarea{color-sche
 <!-- IA PANEL -->
 <div class="ai-panel" id="aiPanel">
   <div class="ai-header">
-    <div class="ai-title">🤖 Assistant <span class="ai-badge">IA</span></div>
+    <div class="ai-title">🤖 JoanGPT <span class="ai-badge">IA</span></div>
     <button class="btn btn-icon" onclick="toggleAI()">✕</button>
   </div>
   <div class="ai-messages" id="aiMessages">
-    <div class="ai-msg bot">Bonjour ! 👋 Je suis ton assistant scolaire. Je peux t'aider avec tes devoirs, expliquer des notions, ou répondre à tes questions.</div>
+    <div class="ai-msg bot">Bonjour ! 👋 Je suis <b>JoanGPT</b>, ton assistant scolaire. Je peux t'aider avec tes devoirs, expliquer des notions, ou répondre à tes questions.</div>
   </div>
   <div class="ai-suggestions" id="aiSug">
     <button class="ai-sug" onclick="aiQuick('Explique-moi la photosynthèse')">🌿 Photosynthèse</button>
@@ -285,7 +293,7 @@ body.theme-nuit input,body.theme-nuit select,body.theme-nuit textarea{color-sche
     <div style="font-size:13px;color:var(--text2);line-height:1.6">
       <p>📚 <b>Devoirs</b> : matière, description, priorité et date de rendu.</p><br>
       <p>🎉 <b>Événements</b> : anniversaires, sorties, contrôles et plus.</p><br>
-      <p>🤖 <b>IA</b> : assistant scolaire propulsé par GPT.</p><br>
+      <p>🤖 <b>JoanGPT</b> : ton assistant scolaire IA.</p><br>
       <p>🧮 <b>Calculatrice</b> : calculs rapides dans la barre latérale.</p><br>
       <p>💾 Toutes tes données sont <b>sauvegardées localement</b>.</p>
     </div>
@@ -382,8 +390,9 @@ function renderSidebar(key,y,m,d){
   const items=getItemsForDate(key);const devoirs=items.filter(i=>i.type==='devoir');const events=items.filter(i=>i.type==='event');
   let html='';
   if(devoirs.length){
-    html+=`<div class="section-label" style="margin-bottom:8px">📚 Devoirs (${devoirs.length})</div><div class="items-list">`;
-    devoirs.forEach(item=>{const mat=MATIÈRES.find(x=>x.id===item.matiere)||MATIÈRES[MATIÈRES.length-1];const pColors={low:'#22C55E',medium:'#F59E0B',high:'#EF4444'};const pLabels={low:'Faible',medium:'Moyen',high:'Urgent'};html+=`<div class="item-card" style="border-left-color:${mat.color}"><span class="item-card-badge" style="background:${mat.bg};color:${mat.color}">${mat.label}</span>${item.priority?`<span class="item-card-badge" style="background:none;color:${pColors[item.priority]||'#94A3B8'};margin-left:4px">● ${pLabels[item.priority]||''}</span>`:''}<div class="item-card-title">${escHtml(item.title||'Sans titre')}</div>${item.desc?`<div class="item-card-sub">${escHtml(item.desc)}</div>`:''}<button class="item-del" onclick="deleteItem('${item.id}')">✕</button></div>`;});
+    const nb=devoirs.length;const nbFaits=devoirs.filter(i=>i.done).length;
+    html+=`<div class="section-label" style="margin-bottom:8px">📚 Devoirs (${nbFaits}/${nb} faits)</div><div class="items-list">`;
+    devoirs.forEach(item=>{const mat=MATIÈRES.find(x=>x.id===item.matiere)||MATIÈRES[MATIÈRES.length-1];const pColors={low:'#22C55E',medium:'#F59E0B',high:'#EF4444'};const pLabels={low:'Faible',medium:'Moyen',high:'Urgent'};html+=`<div class="item-card${item.done?' is-done':''}" style="border-left-color:${item.done?'#22C55E':mat.color}"><div class="item-card-top"><button class="item-done-btn${item.done?' done':''}" onclick="toggleDone('${item.id}')" title="${item.done?'Marquer non fait':'Marquer comme fait'}">${item.done?'✓':''}</button><div class="item-card-top-content"><span class="item-card-badge" style="background:${mat.bg};color:${mat.color}">${mat.label}</span>${item.priority&&!item.done?`<span class="item-card-badge" style="background:none;color:${pColors[item.priority]||'#94A3B8'};margin-left:4px">● ${pLabels[item.priority]||''}</span>`:''}<div class="item-card-title">${escHtml(item.title||'Sans titre')}</div>${item.desc?`<div class="item-card-sub">${escHtml(item.desc)}</div>`:''}</div><button class="item-del" onclick="deleteItem('${item.id}')">✕</button></div></div>`;});
     html+='</div>';
   }
   if(events.length){
